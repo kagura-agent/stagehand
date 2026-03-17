@@ -29,7 +29,10 @@ import type {
   SerializableResponse,
   AgentCacheTransferPayload,
 } from "./types/private/index.js";
-import type { ClientOptions, ModelConfiguration } from "./types/public/model.js";
+import type {
+  ClientOptions,
+  ModelConfiguration,
+} from "./types/public/model.js";
 import { toJsonSchema } from "./zodCompat.js";
 import type { StagehandZodSchema } from "./zodCompat.js";
 
@@ -220,7 +223,8 @@ export class StagehandAPIClient {
 
     // Store session model config to resend on each request (for hosted deployments
     // that don't persist modelClientOptions server-side).
-    const serializedMco = this.toSessionStartModelClientOptions(modelClientOptions);
+    const serializedMco =
+      this.toSessionStartModelClientOptions(modelClientOptions);
     if (modelName && serializedMco && Object.keys(serializedMco).length > 0) {
       this.sessionModelConfig = {
         modelName,
@@ -664,9 +668,9 @@ export class StagehandAPIClient {
    * defaults. This ensures hosted deployments (which don't persist
    * modelClientOptions server-side) receive the model config on every request.
    */
-  private ensureModelConfig<
-    T extends { model?: unknown } | undefined,
-  >(wireOptions: T): T {
+  private ensureModelConfig<T extends { model?: unknown } | undefined>(
+    wireOptions: T,
+  ): T {
     if (!this.sessionModelConfig) {
       return wireOptions;
     }
@@ -695,6 +699,7 @@ export class StagehandAPIClient {
       (headers === null ||
         typeof headers !== "object" ||
         Array.isArray(headers) ||
+        headers instanceof Headers ||
         "then" in headers ||
         Object.values(headers as Record<string, unknown>).some(
           (value) => typeof value !== "string",

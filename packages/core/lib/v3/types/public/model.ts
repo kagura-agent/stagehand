@@ -98,6 +98,7 @@ export type ModelProvider =
   | "cerebras"
   | "groq"
   | "google"
+  | "bedrock"
   | "aisdk";
 
 export type ClientOptions = {
@@ -110,9 +111,7 @@ export type ClientOptions = {
    * Use BedrockProviderOptions for Bedrock (region, accessKeyId, etc.)
    * or GoogleVertexProviderSettings for Vertex (project, location, etc.).
    * Other providers can pass arbitrary options via type assertion. */
-  providerOptions?:
-    | BedrockProviderOptions
-    | GoogleVertexProviderSettings;
+  providerOptions?: BedrockProviderOptions | GoogleVertexProviderSettings;
   /** OpenAI organization ID */
   organization?: string;
   /** Delay between agent actions in ms */

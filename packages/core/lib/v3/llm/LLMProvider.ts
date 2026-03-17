@@ -118,9 +118,26 @@ export function getAISDKLanguageModel(
     }
     // Flatten providerOptions into the options bag for the AI SDK constructor
     const { providerOptions, ...restOptions } = clientOptions;
+    const providerHeaders =
+      providerOptions &&
+      typeof providerOptions === "object" &&
+      "headers" in providerOptions &&
+      providerOptions.headers &&
+      typeof providerOptions.headers === "object" &&
+      !Array.isArray(providerOptions.headers)
+        ? (providerOptions.headers as Record<string, string>)
+        : undefined;
     const flatOptions = {
       ...restOptions,
       ...(providerOptions ?? {}),
+      ...(restOptions.headers || providerHeaders
+        ? {
+            headers: {
+              ...(restOptions.headers ?? {}),
+              ...(providerHeaders ?? {}),
+            },
+          }
+        : {}),
     } as ClientOptions;
     const provider = creator(flatOptions);
     // Get the specific model from the provider
