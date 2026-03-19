@@ -1,6 +1,6 @@
 import type { RouteHandlerMethod, RouteOptions } from "fastify";
 import { StatusCodes } from "http-status-codes";
-import type { Action } from "@browserbasehq/stagehand";
+import type { Action, ModelConfiguration } from "@browserbasehq/stagehand";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { Api } from "@browserbasehq/stagehand";
 
@@ -57,10 +57,10 @@ const observeRouteHandler: RouteHandlerMethod = withErrorHandling(
             typeof data.options?.model === "string"
               ? { modelName: data.options.model }
               : data.options?.model
-                ? {
-                    ...data.options.model,
-                    modelName: data.options.model.modelName ?? "gpt-4o",
-                  }
+              ? {
+                  ...data.options.model,
+                  modelName: data.options.model.modelName ?? "gpt-4o",
+                } as ModelConfiguration
                 : undefined,
           page,
         };
