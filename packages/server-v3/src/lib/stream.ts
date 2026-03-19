@@ -8,6 +8,7 @@ import { AppError } from "./errorHandler.js";
 import {
   getModelApiKey,
   getRequestModelConfig,
+  getModelName,
   getOptionalHeader,
   shouldRespondWithSSE,
 } from "./header.js";
@@ -160,6 +161,19 @@ export async function createStreamingResponse<TV3>({
     result = await handler({ stagehand, data: parsedData });
   } catch (err) {
     handlerError = err instanceof Error ? err : new Error("Unknown error");
+    request.log.error(
+      {
+        err: handlerError,
+        operation: operation ?? "operation",
+        sessionId,
+        browserType,
+        modelName: getModelName(request),
+        hasModelApiKey: Boolean(modelApiKey),
+        hasBrowserbaseApiKey: Boolean(browserbaseApiKey),
+        hasBrowserbaseProjectId: Boolean(browserbaseProjectId),
+      },
+      "operation handler failed",
+    );
   }
 
   if (handlerError) {

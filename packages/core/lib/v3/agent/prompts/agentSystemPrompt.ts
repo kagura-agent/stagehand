@@ -1,16 +1,19 @@
 import type { AgentToolMode, Variables } from "../../types/public/agent.js";
+import { CAPTCHA_SYSTEM_PROMPT_NOTE } from "../utils/captchaSolver.js";
 
 export interface AgentSystemPromptOptions {
   url: string;
   executionInstruction: string;
   mode: AgentToolMode;
   systemInstructions?: string;
-  /** Whether running on Browserbase (enables captcha solver messaging) */
-  isBrowserbase?: boolean;
+  /** Whether captchas are automatically solved by the browser environment */
+  captchasAutoSolve?: boolean;
   /** Tools to exclude from the system prompt */
   excludeTools?: string[];
   /** Variables available to the agent for use in act/type tools */
   variables?: Variables;
+  /** Whether the search tool is enabled for this execution */
+  useSearch?: boolean;
 }
 
 /**
@@ -122,16 +125,17 @@ export function buildAgentSystemPrompt(
     executionInstruction,
     mode,
     systemInstructions,
-    isBrowserbase = false,
+    captchasAutoSolve = false,
     excludeTools,
     variables,
+    useSearch = false,
   } = options;
   const localeDate = new Date().toLocaleDateString();
   const isoDate = new Date().toISOString();
   const cdata = (text: string) => `<![CDATA[${text}]]>`;
 
   const isHybridMode = mode === "hybrid";
-  const hasSearch = Boolean(process.env.BRAVE_API_KEY);
+  const hasSearch = useSearch || Boolean(process.env.BRAVE_API_KEY);
 
   // Tools section differs based on mode and excluded tools
   const toolsSection = buildToolsSection(isHybridMode, hasSearch, excludeTools);
@@ -193,11 +197,10 @@ export function buildAgentSystemPrompt(
     </step_1>
   </page_understanding_protocol>`;
 
-  // Roadblocks section only shown when running on Browserbase (has captcha solver)
-  const roadblocksSection = isBrowserbase
+  // Roadblocks section only shown when captchas are auto-solved
+  const roadblocksSection = captchasAutoSolve
     ? `<roadblocks>
-    <note>captchas, popups, etc.</note>
-    <captcha>If you see a captcha, use the wait tool. It will automatically be solved by our internal solver.</captcha>
+    <note>${CAPTCHA_SYSTEM_PROMPT_NOTE}</note>
   </roadblocks>`
     : "";
 
@@ -210,7 +213,7 @@ export function buildAgentSystemPrompt(
   const hasVariables = variables && Object.keys(variables).length > 0;
   const variableToolsNote = isHybridMode
     ? "Use %variableName% syntax in the type, fillFormVision, or act tool's value/text/action fields."
-    : "Use %variableName% syntax in the act or fillForm tool's value/action fields.";
+    : "Use %variableName% syntax in the act or fillForm tool's action fields.";
   const variablesSection = hasVariables
     ? `<variables>
     <note>You have access to the following variables. Use %variableName% syntax to substitute variable values. This is especially important for sensitive data like passwords.</note>
