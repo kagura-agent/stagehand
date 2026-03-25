@@ -29,7 +29,10 @@ import type {
   SerializableResponse,
   AgentCacheTransferPayload,
 } from "./types/private/index.js";
-import type { ClientOptions, ModelConfiguration } from "./types/public/model.js";
+import type {
+  ClientOptions,
+  ModelConfiguration,
+} from "./types/public/model.js";
 import { normalizeClientOptionsForModel } from "./providerConfig.js";
 import { toJsonSchema } from "./zodCompat.js";
 import type { StagehandZodSchema } from "./zodCompat.js";
@@ -672,9 +675,9 @@ export class StagehandAPIClient {
    * defaults. This ensures hosted deployments (which don't persist
    * modelClientOptions server-side) receive the model config on every request.
    */
-  private ensureModelConfig<
-    T extends { model?: unknown } | undefined,
-  >(wireOptions: T): T {
+  private ensureModelConfig<T extends { model?: unknown } | undefined>(
+    wireOptions: T,
+  ): T {
     if (!this.sessionModelConfig) {
       return wireOptions;
     }
@@ -695,7 +698,10 @@ export class StagehandAPIClient {
       return undefined;
     }
 
-    const normalizedOptions = normalizeClientOptionsForModel(options, modelName);
+    const normalizedOptions = normalizeClientOptionsForModel(
+      options,
+      modelName,
+    );
     if (!normalizedOptions) {
       return undefined;
     }

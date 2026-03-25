@@ -158,38 +158,41 @@ export const ProviderConfigSchema = z
 
 export const ModelConfigObjectSchema = addProviderConfigValidation(
   z
-  .object({
-    modelName: z.string().meta({
-      description:
-        "Model name string with provider prefix (e.g., 'openai/gpt-5-nano')",
-      example: "openai/gpt-5-nano",
-    }),
-    apiKey: z.string().optional().meta({
-      description: "API key for the model provider",
-      example: "sk-some-openai-api-key",
-    }),
-    baseURL: z.string().url().optional().meta({
-      description: "Base URL for the model provider",
-      example: "https://api.openai.com/v1",
-    }),
-    headers: z.record(z.string(), z.string()).optional().meta({
-      description:
-        "Custom headers sent with every request to the model provider",
-      example: { "X-Custom-Header": "value" },
-    }),
-    providerConfig: ProviderConfigSchema.optional().meta({
-      description:
-        "Provider-specific configuration for model providers that require extra constructor options.",
-      example: {
-        provider: "bedrock",
-        options: {
-          region: "us-east-1",
-          accessKeyId: "AKIAIOSFODNN7EXAMPLE",
+    .object({
+      modelName: z.string().meta({
+        description:
+          "Model name string with provider prefix (e.g., 'openai/gpt-5-nano')",
+        example: "openai/gpt-5-nano",
+      }),
+      apiKey: z.string().optional().meta({
+        description: "API key for the model provider",
+        example: "sk-some-openai-api-key",
+      }),
+      baseURL: z.string().url().optional().meta({
+        description: "Base URL for the model provider",
+        example: "https://api.openai.com/v1",
+      }),
+      headers: z
+        .record(z.string(), z.string())
+        .optional()
+        .meta({
+          description:
+            "Custom headers sent with every request to the model provider",
+          example: { "X-Custom-Header": "value" },
+        }),
+      providerConfig: ProviderConfigSchema.optional().meta({
+        description:
+          "Provider-specific configuration for model providers that require extra constructor options.",
+        example: {
+          provider: "bedrock",
+          options: {
+            region: "us-east-1",
+            accessKeyId: "AKIAIOSFODNN7EXAMPLE",
+          },
         },
-      },
-    }),
-  })
-  .meta({ id: "ModelConfigObject" }),
+      }),
+    })
+    .meta({ id: "ModelConfigObject" }),
 );
 
 /** Model configuration */
@@ -208,10 +211,13 @@ export const ModelClientOptionsSchema = z
       description: "Base URL for the model provider",
       example: "https://api.openai.com/v1",
     }),
-    headers: z.record(z.string(), z.string()).optional().meta({
-      description: "Custom headers for the model provider",
-      example: { "X-Custom-Header": "value" },
-    }),
+    headers: z
+      .record(z.string(), z.string())
+      .optional()
+      .meta({
+        description: "Custom headers for the model provider",
+        example: { "X-Custom-Header": "value" },
+      }),
     providerConfig: ProviderConfigSchema.optional().meta({
       description:
         "Provider-specific configuration for model providers that require extra constructor options.",
