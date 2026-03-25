@@ -1379,6 +1379,7 @@ export class V3 {
       const handlerParams: ObserveHandlerParams = {
         instruction,
         model: options?.model,
+        variables: options?.variables,
         timeout: options?.timeout,
         selector: options?.selector,
         page: page!,
@@ -1401,6 +1402,7 @@ export class V3 {
         "observe",
         {
           instruction,
+          variables: options?.variables,
           timeout: options?.timeout,
         },
         results,
