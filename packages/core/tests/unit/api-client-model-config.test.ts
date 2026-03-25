@@ -165,6 +165,62 @@ describe("StagehandAPIClient model config handling", () => {
     });
   });
 
+  it("serializes Vertex Headers instances nested under providerConfig on session start", async () => {
+    const client = new StagehandAPIClient({
+      apiKey: "bb-api-key",
+      projectId: "bb-project-id",
+      logger: () => {},
+    });
+    const fetchWithCookies = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            available: true,
+            sessionId: "session-id",
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    (client as unknown as { fetchWithCookies: typeof fetchWithCookies })
+      .fetchWithCookies = fetchWithCookies;
+
+    await client.init({
+      modelName: "vertex/gemini-2.5-pro",
+      modelClientOptions: {
+        providerConfig: {
+          provider: "vertex",
+          options: {
+            project: "test-project",
+            headers: new Headers({
+              "x-vertex-test-header": "present",
+            }) as unknown as Record<string, string>,
+          },
+        },
+      },
+    });
+
+    const [, requestInit] = fetchWithCookies.mock.calls[0] as [
+      string,
+      RequestInit,
+    ];
+    expect(JSON.parse(String(requestInit.body))).toMatchObject({
+      modelClientOptions: {
+        providerConfig: {
+          provider: "vertex",
+          options: {
+            project: "test-project",
+            headers: {
+              "x-vertex-test-header": "present",
+            },
+          },
+        },
+      },
+    });
+  });
+
   it("resends session model config on act calls without explicit model", async () => {
     const client = new StagehandAPIClient({
       apiKey: "bb-api-key",
@@ -357,5 +413,72 @@ describe("StagehandAPIClient model config handling", () => {
       provider: "bedrock",
       options: { region: "us-east-1" },
     });
+  });
+
+  it("serializes Vertex Headers instances nested under providerConfig for agentExecute overrides", async () => {
+    const client = new StagehandAPIClient({
+      apiKey: "bb-api-key",
+      projectId: "bb-project-id",
+      logger: () => {},
+    });
+    const execute = vi.fn().mockResolvedValue({
+      success: true,
+      message: "ok",
+      actions: [],
+      completed: true,
+    });
+
+    Object.assign(
+      client as unknown as {
+        modelApiKey: string | undefined;
+        modelProvider: string;
+        execute: typeof execute;
+      },
+      {
+        modelApiKey: undefined,
+        modelProvider: "vertex",
+        execute,
+      },
+    );
+
+    await client.agentExecute(
+      {
+        model: {
+          modelName: "vertex/gemini-2.5-pro",
+          providerConfig: {
+            provider: "vertex",
+            options: {
+              project: "test-project",
+              headers: new Headers({
+                "x-vertex-test-header": "present",
+              }) as unknown as Record<string, string>,
+            },
+          },
+        },
+      },
+      "Describe the page",
+    );
+
+    expect(execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: "agentExecute",
+        args: expect.objectContaining({
+          agentConfig: expect.objectContaining({
+            model: {
+              modelName: "vertex/gemini-2.5-pro",
+              providerConfig: {
+                provider: "vertex",
+                options: {
+                  project: "test-project",
+                  headers: {
+                    "x-vertex-test-header": "present",
+                  },
+                },
+              },
+            },
+          }),
+        }),
+      }),
+    );
   });
 });
