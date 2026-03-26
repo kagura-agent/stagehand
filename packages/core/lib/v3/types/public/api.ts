@@ -57,6 +57,24 @@ function addProviderConfigValidation<
         path: ["providerConfig", "provider"],
       });
     }
+
+    const hasApiKey = "apiKey" in value && typeof value.apiKey === "string";
+    const hasAwsCredentials =
+      providerConfig?.provider === "bedrock" &&
+      "options" in providerConfig &&
+      providerConfig.options &&
+      typeof providerConfig.options === "object" &&
+      "accessKeyId" in providerConfig.options &&
+      "secretAccessKey" in providerConfig.options;
+
+    if (hasApiKey && hasAwsCredentials) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "apiKey and Bedrock credentials (accessKeyId/secretAccessKey) are mutually exclusive",
+        path: ["apiKey"],
+      });
+    }
   }) as T;
 }
 
