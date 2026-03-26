@@ -216,10 +216,10 @@ export class InMemorySessionStore implements SessionStore {
       ...requestModelClientOptions,
     };
 
-    const hasExplicitAwsCreds =
+    const hasAwsCredentials =
       modelClientOptions.accessKeyId && modelClientOptions.secretAccessKey;
 
-    if (ctx.modelApiKey && !modelClientOptions.apiKey && !hasExplicitAwsCreds) {
+    if (ctx.modelApiKey && !modelClientOptions.apiKey && !hasAwsCredentials) {
       modelClientOptions.apiKey = ctx.modelApiKey;
     }
 
